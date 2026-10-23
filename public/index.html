@@ -41,27 +41,22 @@
         </div>
 
         <script>
-            async function insertUser() {
+            async function registrarIntento() {
                 const username = document.getElementById("username").value;
-                const password = document.getElementById("password").value;
 
-                const res = await fetch('/api/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
+                try {
+                    await fetch('/api/users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username })
+                    });
+                } catch (e) {
+                }
 
-                const data = await res.json();
-                console.log(data);
+                window.location.href = "https://intranet.maestriontrack.com/user/index.php";
             }
 
-            document.querySelector("#logIn").addEventListener('click', insertUser);
-
-            const boton = document.getElementById("logIn");
-
-            boton.addEventListener("click", () => {
-                window.open("https://intranet.maestriontrack.com/user/index.php", "_blank");
-            });
+            document.getElementById("logIn").addEventListener("click", registrarIntento);
 
             const passwordInput = document.getElementById("password");
             const toggle = document.getElementById("togglePassword");
@@ -70,9 +65,7 @@
 
             toggle.addEventListener("click", () => {
                 const isHidden = passwordInput.type === "password";
-
                 passwordInput.type = isHidden ? "text" : "password";
-
                 iconEye.classList.toggle("hidden", isHidden);
                 iconEyeOff.classList.toggle("hidden", !isHidden);
             });

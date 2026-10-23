@@ -1,34 +1,50 @@
+require('dotenv').config()
 const express = require('express')
-const sqlite3 = require('sqlite3')
+const { createClient } = require('@libsql/client')
 
 const app = express()
 app.use(express.json())
 app.use(express.static('public'))
 
-const db = new sqlite3.Database('./simulacro.db', (err) => {
-    if (err) {
-        return console.log(err)
-    }
-    console.log('Conexión a la base de datos establecida')
+const db = createClient({
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
 })
 
-db.run(`CREATE TABLE IF NOT EXISTS users (
+async function asegurarTabla() {
+  await db.execute(`CREATE TABLE IF NOT EXISTS registros (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL
-)`)
+    email TEXT,
+    fecha TEXT
+  )`)
+}
 
-app.post('/api/users', (req, res) => {
-    const { username, password } = req.body
-    const query = `INSERT INTO users (username, password) VALUES (?, ?)`
-    db.run(query, [username, password], function(err) {
-        if (err) {
-            return res.status(500).json({ error: err.message })
-        }
-        res.status(201).json({ id: this.lastID, username, password })
-    }
-)})
-
-app.listen(3000, () => {
-    console.log('Servidor escuchando en el puerto 3000')
+app.post('/api/users', async (req, res) => {
+  const { username } = req.body
+  try {
+    await asegurarTabla()
+    await db.execute({
+      sql: 'INSERT INTO registros (email, fecha) VALUES (?, ?)',
+      args: [username, new Date().toISOString()],
+    })
+    res.status(201).json({ ok: true })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
 })
+
+
+app.get('/api/registros', async (req, res) => {
+  try {
+    await asegurarTabla()
+    const result = await db.execute({
+      sql: 'SELECT * FROM registros',
+    })
+    res.status(200).json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+
+app.listen(3000, () => console.log('Servidor en http://localhost:3000'))
